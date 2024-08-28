@@ -1,0 +1,43 @@
+apiVersion: v2
+appVersion: 1.1.0
+dependencies:
+- name: eric-cniv-bench-integration
+  repository: https://arm.epk.ericsson.se/artifactory/proj-eric-oss-cniv-drop-helm/
+  version: 0.1.1-239
+- name: eric-enm-es-benchmark
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-cniv-drop-helm/
+  tags:
+  - eric-enm-es-benchmark
+  - custom-bench
+  version: 1.0.0-46
+- name: eric-enm-pm-bench
+  repository: https://arm.epk.ericsson.se/artifactory/proj-eric-oss-cniv-drop-helm/
+  tags:
+  - eric-enm-pm-bench
+  - custom-bench
+  version: 1.0.0-66
+- name: eric-enm-document-database-benchmark
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-enm-helm-local/
+  tags:
+  - eric-enm-document-database-benchmark
+  - custom-bench
+  version: 1.1.0-37
+- name: eric-pm-server
+  repository: https://arm.rnd.ki.sw.ericsson.se/artifactory/proj-adp-pm-server-released-helm/
+  version: 13.0.0+13
+- name: eric-neo4j-load-test-fwk
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-cniv-drop-helm-local/
+  tags:
+  - eric-neo4j-load-test-fwk
+  - custom-bench
+  version: 1.0.0-130
+- name: eric-enm-cniv-modeling-benchmark
+  repository: https://arm.seli.gic.ericsson.se/artifactory/proj-eric-oss-cniv-drop-helm/
+  tags:
+  - eric-enm-cniv-modeling-benchmark
+  - custom-bench
+  version: 1.0.0-54
+description: A Helm chart for Kubernetes
+name: eric-cniv-enm-integration-chart
+type: application
+version: 0.1.1-466

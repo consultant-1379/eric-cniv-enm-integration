@@ -1,0 +1,759 @@
+eric-cniv-bench-integration:
+  eric-oss-cn-infra-verification-tool:
+    environmentType: Small Cloud Native ENM
+    images:
+      agent:
+        tag:
+    imageCredentials:
+      repoPath:
+    persistentVolumeClaim:
+      storageClass:
+        block: standard
+
+  eric-cniv-k8s-version:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+
+    requirements:
+      k8sVersion:
+        expectedResult:
+          version: '>=1.27 <=1.29'
+
+  eric-cniv-k8s-apis:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+    requirements:
+      networking.k8s.io/v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the networking.k8s.io/v1 api is present"
+      batch/v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the batch/v1 api is present"
+      rbac.authorization.k8s.io/v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the rbac.authorization.k8s.io/v1 api is present"
+      v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the v1 api is present"
+      apps/v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the apps/v1 api is present"
+      policy/v1:
+        expectedResult:
+          state: present
+        description: "Verifies that the policy/v1 api is present"
+
+  eric-cniv-block-storage:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+
+    resources:
+      limits:
+        cpu: 2
+        memory: 3Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
+
+    persistentVolumeClaim:
+      targetBackend: block
+      accessMode: ReadWriteOnce
+      size: 200Gi
+      storageClass:
+        name: standard
+
+    # Do NOT include directory, it is hardcoded to /mnt/storage-volume
+# config to get max throughput
+    config:
+      bs: 1m
+      size: 32G
+      rw: rw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 64
+      numjobs: 1
+      group_reporting: 1
+
+# config to get max IOPS
+    config2:
+      bs: 4k
+      size: 4G
+      rw: randrw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 256
+      numjobs: 1
+      group_reporting: 1
+
+# config to get max latency
+    config3:
+      bs: 4k
+      size: 256M
+      rw: rw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 4
+      numjobs: 1
+      group_reporting: 1
+    #     create_on_open: 1
+    #     bs: 8k
+    #     nrfiles: 9000
+    #     direct: 1
+    #     rw: write
+    #     ioengine: filecreate
+    #     fallocate: none
+    #     filesize: 8k
+    #     openfiles: 1
+    #     numjobs: 1
+
+    description: "Performance of RWO storage in the target cluster is evaluated and validated by subjecting it to stress tests using FIO tool."
+    requirements:
+      readIops:
+        expectedResult:
+          minimum: 3836
+        description: "Verifies the average number of disk read operations per second per node"
+        map: "read.iops_mean"
+      writeIops:
+        expectedResult:
+          minimum: 2302
+        description: "Verifies the average number of disk write operations per second per node"
+        map: "write.iops_mean"
+      readThroughputMbps:
+        expectedResult:
+          minimum: 370
+        description: "Verifies the amount of data read successfully in a given time period"
+        map: "read.bw_bytes"
+      writeThroughputMbps:
+        expectedResult:
+          minimum: 450
+        description: "Verifies the amount of data written successfully in a given time period"
+        map: "write.bw_bytes"
+      readLatencyMs:
+        expectedResult:
+          maximum: 15
+        description: "Verifies the amount of time it takes for the data to come back"
+        map: "read.lat_ns[*].mean"
+      writeLatencyMs:
+        expectedResult:
+          maximum: 15
+        description: "Verifies the amount of time for the write acknowledgment to return"
+        map: "write.lat_ns[*].mean"
+    #      writeTime:
+    #        expectedResult:
+    #          maximum: 700
+    #        description: "Total time spend to write files [ms]"
+    #        map: "write.runtime"
+    podAntiAffinity: true
+    createBlockPriority: true
+    priorityClass: block-storage
+
+
+  eric-cniv-file-storage:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+
+    resources:
+      limits:
+        cpu: 2
+        memory: 3Gi
+      requests:
+        cpu: 1
+        memory: 2Gi
+
+    persistentVolumeClaim:
+      targetBackend: file
+      accessMode: ReadWriteMany
+      size: 200Gi
+      storageClass:
+        name: standard
+
+    # Do NOT include directory, it is hardcoded to /mnt/storage-volume
+# config to get max throughput
+    config:
+      bs: 1m
+      size: 2G
+      rw: rw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 64
+      numjobs: 1
+      group_reporting: 1
+
+# config to get max IOPS
+    config2:
+      bs: 4k
+      size: 256M
+      rw: randrw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 256
+      numjobs: 1
+      group_reporting: 1
+
+# config to get max latency
+    config3:
+      bs: 4k
+      size: 256M
+      rw: rw
+      rwmixread: 50
+      direct: 1
+      ioengine: libaio
+      runtime: 300
+      time_based: 1
+      iodepth: 4
+      numjobs: 1
+      group_reporting: 1
+    #     create_on_open: 1
+    #     bs: 8k
+    #     nrfiles: 9000
+    #     direct: 1
+    #     rw: write
+    #     ioengine: filecreate
+    #     fallocate: none
+    #     filesize: 8k
+    #     openfiles: 1
+    #     numjobs: 1
+
+    description: "Performance of RWX storage in the target cluster is evaluated and validated by subjecting it to stress tests using FIO tool."
+    requirements:
+      readIops:
+        expectedResult:
+          minimum: 4500
+        description: "Verifies the average number of disk read operations per second per node"
+        map: "read.iops_mean"
+      writeIops:
+        expectedResult:
+          minimum: 4000
+        description: "Verifies the average number of disk write operations per second per node"
+        map: "write.iops_mean"
+      readThroughputMbps:
+        expectedResult:
+          minimum: 500
+        description: "Verifies the amount of data read successfully in a given time period"
+        map: "read.bw_bytes"
+      writeThroughputMbps:
+        expectedResult:
+          minimum: 300
+        description: "Verifies the amount of data written successfully in a given time period"
+        map: "write.bw_bytes"
+      readLatencyMs:
+        expectedResult:
+          maximum: 15
+        description: "Verifies the amount of time it takes for the data to come back"
+        map: "read.lat_ns[*].mean"
+      writeLatencyMs:
+        expectedResult:
+          maximum: 15
+        description: "Verifies the amount of time for the write acknowledgment to return"
+        map: "write.lat_ns[*].mean"
+    #      writeTime:
+    #        expectedResult:
+    #          maximum: 700
+    #        description: "Total time spend to write files [ms]"
+    #        map: "write.runtime"
+    podAntiAffinity: true
+    createFilePriority: true
+    priorityClass: file-storage
+
+
+  eric-cniv-netperf:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+    requirements:
+      tcpLatency:
+        expectedResult:
+          maximum: 80.0 ms
+        description: 'TCP one way latency'
+      udpLatency:
+        expectedResult:
+          maximum: 0.5 ms
+        description: 'UDP one way latency'
+      tcpBandwidth:
+        expectedResult:
+          minimum: 50 MB
+        description: 'TCP streaming one way bandwidth'
+      udpSendBandwidth:
+        expectedResult:
+          minimum: 100 MB
+        description: 'UDP streaming one way send bandwidth'
+      udpRecvBandwidth:
+        expectedResult:
+          minimum: 1 MB
+        description: 'UDP streaming one way receive bandwidth'
+
+    config:
+      duration: 10
+      tcpMessageSize:
+      udpMessageSize:
+
+    podAntiAffinity: true
+
+  eric-cniv-resources:
+    images:
+      initBench:
+        tag:
+      providerBench:
+        tag:
+    imageCredentials:
+      repoPath:
+    description: "Resource benchmark will determine the resources available on the k8s cluster and will verify that the cluster meets the resource requirements for the selected cENM deployment type."
+    requirements:
+      MinNumberWorkerNodesReqd:
+        expectedResult:
+          minimum: 4
+        description: "Verifies the minimum number of worker nodes that the  k8s deployment requires for small ENM"
+      AllWorkerNodesAllocatablevCPU:
+        expectedResult:
+          minimum: 194
+        description: "Verifies the minimum allocatable number of CPUs for all worker nodes based on total number of CPUs available"
+      AllWorkerNodesAllocatableMemory:
+        expectedResult:
+          minimum: 1479
+        description: "Verifies the minimum allocatable memory in GiB for all worker nodes based on total memory available"
+      AllWorkerNodesFreevCPU:
+        expectedResult:
+          minimum: 194
+        description: "Verifies the free CPU of the all the worker nodes in the cluster based on total CPU minus usage"
+      AllWorkerNodesFreeMem:
+        expectedResult:
+          minimum: 1479
+        description: "Verifies the free memory GiB of the all the worker nodes in the cluster based on total memory minus usage"
+      AllWorkerNodesAllocatableEphemeralStorage:
+        expectedResult:
+          minimum: 1024
+        description: "Verifies the total EphemeralStorage GiB allocated to of all worker nodes in the cluster"
+      AllWorkerNodesAllocatablePods:
+        expectedResult:
+          minimum: 450
+        description: "Verifies the total pod allocated to of all worker nodes in the cluster"
+      MinimumMemoryRequiredPerNode:
+        expectedResult:
+          minimum: 49
+        description: "Verifies if each node's memory is greater than the largest pod"
+      MinimumCPURequiredPerNode:
+        expectedResult:
+          minimum: 10
+        description: "Verifies if each node's cpu is greater than the largest pod"
+    cenmreserve: true
+
+eric-enm-pm-bench:
+  benchmarkArgs:
+    durationMinutes: "5040"
+    workload: "5kload.xml"
+    metricsPort: 9600
+    average900SecRopDuration: 650
+    reportingPeriodInMin: 60
+    controller:
+      mode: "CTRL"
+      modeArgs:
+        writers: "2"
+    writer:
+      modeArgs: { }
+      threadsPerWriter: 75
+    reader:
+      modeArgs:
+        delayMinutes: "15"
+      additionalArgs: "-Drops=1,15 -DprocessNodeB=true -DfileTypes=XML,CTR,CTUM,UETR,UETRACE,CELLTRACE,CELLTRACECCTR,EBSL,GPEH,EBM -Dreadsize=32 -Dthreads=16"
+  resources:
+    controller:
+      limits:
+        cpu: "2"
+        memory: "4Gi"
+      requests:
+        cpu: "900m"
+        memory: "4Gi"
+    reader:
+      limits:
+        cpu: "4"
+        memory: "4Gi"
+      requests:
+        cpu: "900m"
+        memory: "4Gi"
+    writer:
+      limits:
+        cpu: "2"
+        memory: "5Gi"
+      requests:
+        cpu: "900m"
+        memory: "5Gi"
+  persistentVolumeClaim:
+    targetBackend: file
+    # storageConnectivity needed for GL-D470204-070
+    #   storageConnectivity: networked
+    # accessMode defaults to ReadWriteOnce but can be overridden here
+    accessMode: ReadWriteMany
+    # Size of the persistent volume
+    size: 500Gi
+    storageClass:
+      name: standard
+  images:
+    iotest:
+      name: eric-enm-pm-bench
+      tag:
+    initBench:
+      name: eric-cniv-init-bench
+      tag:
+  imageCredentials:
+    iotest:
+      repoPath:
+    initBench:
+      repoPath:
+  podAnnotations: { }
+  # Required by DR-D1120-045
+  nodeSelector: { }
+  # DR-D1121-065
+  annotations: { }
+  # Required by DR-D1121-068
+  labels: { }
+  # Required for DR-D1120-060-AD and DR-D1120-067-AD
+  tolerations:
+    - key: node.kubernetes.io/not-ready
+      operator: Exists
+      effect: NoExecute
+      tolerationSeconds: 0
+    - key: node.kubernetes.io/unreachable
+      operator: Exists
+      effect: NoExecute
+      tolerationSeconds: 0
+  # Required for DR-D1120-080-AD
+  terminationGracePeriodSeconds: 30
+
+eric-neo4j-load-test-fwk:
+  global:
+    images:
+      repo: proj-eric-oss-cniv/proj-eric-oss-cniv-drop
+      policy: Always
+      neo4j:
+        name: eric-enm-neo4j
+        tag:
+      neo4jPopulator:
+        name: eric-neo4j-populator
+        tag:
+      neo4jLoadProfiles:
+        name: eric-neo4j-load-profiles
+      loadGenerator:
+        name: eric-neo4j-load-generator
+        tag:
+      controlClient:
+        name: eric-load-control-client
+        tag:
+      controlServer:
+        name: eric-load-control-service
+        tag:
+      loadTestFramework:
+        name: eric-dps-ltf
+        tag:
+    load:
+      type: ENM_24_3_Small_Cloud_Native
+      profiles: 69
+    persistentVolumeClaim:
+      sfs:
+        storage: 5Gi
+    ignoreResources: false
+    populator:
+      concurrent:
+        workers: 7
+    monitoring:
+      metricsEnabled: false
+
+  eric-neo4j-load-test-fwk-load-control:
+    timeout:
+      populator: 1800
+      database:
+        start: 1200
+        warmup: 420
+
+  eric-neo4j-load-test-fwk-load-generator:
+    load:
+      generator:
+        properties:
+          - generator.start.minute=180
+          - generator.end.minute=360
+          - task.ignore.fatal.errors=false
+          - task.queue.threshold=100000
+          - generator.max.query.size=50000
+          - task.execution.threads=10
+          - custom.execution.threads.mscmce=90
+          - custom.execution.threads.impexpserv=45
+          - custom.execution.threads.fmalarmprocessing=45
+          - custom.execution.threads.mspm=45
+
+  # Needs to override the setting configured in the default values.
+  eric-neo4j-load-test-fwk-build-utility:
+    buildUtilityEnabled: false
+
+eric-enm-document-database-benchmark:
+  environmentType: small
+  eric-data-document-database-pg:
+    enabled: true
+
+eric-pm-server:
+  global:
+    security:
+      tls:
+        enabled: false
+  server:
+    serviceAccountName: "eric-pm-server"
+  serverFiles:
+    prometheus.yml: |
+      global:
+        scrape_interval: 15s
+        scrape_timeout: 10s
+        evaluation_interval: 1m
+      rule_files:
+      scrape_configs:
+        - job_name: prometheus
+          static_configs:
+            - targets:
+              - localhost:9090
+        - job_name: configmap-reload
+          static_configs:
+            - targets:
+              - localhost:9085
+        - job_name: pm-exporter
+          static_configs:
+            - targets:
+              - localhost:9087
+        - job_name: 'kubernetes-service-endpoints'
+          kubernetes_sd_configs:
+            - role: endpoints
+              namespaces:
+                names:
+                  - {{ .Release.Namespace }}
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_service_name]
+              action: replace
+              target_label: job
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+              action: drop
+              regex: https
+            - source_labels: [__meta_kubernetes_endpoint_port_name]
+              action: drop
+              regex: (.*-tls)
+            - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+              action: replace
+              target_label: __address__
+              regex: ((?:\[.+\])|(?:.+))(?::\d+);(\d+)
+              replacement: $1:$2
+            - action: labelmap
+              regex: __meta_kubernetes_service_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [__meta_kubernetes_service_name]
+              action: replace
+              target_label: kubernetes_name
+        - job_name: 'kubernetes-pods'
+          kubernetes_sd_configs:
+            - role: pod
+              namespaces:
+                names:
+                  - {{ .Release.Namespace }}
+          relabel_configs:
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+              action: keep
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_container_init]
+              action: drop
+              regex: true
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scheme]
+              action: drop
+              regex: https
+            - source_labels: [__meta_kubernetes_endpoint_port_name]
+              action: drop
+              regex: (.*-tls)
+            - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+              action: replace
+              target_label: __metrics_path__
+              regex: (.+)
+            - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+              action: replace
+              regex: ((?:\[.+\])|(?:.+))(?::\d+);(\d+)
+              replacement: $1:$2
+              target_label: __address__
+            - action: labelmap
+              regex: __meta_kubernetes_pod_label_(.+)
+            - source_labels: [__meta_kubernetes_namespace]
+              action: replace
+              target_label: kubernetes_namespace
+            - source_labels: [__meta_kubernetes_pod_name]
+              action: replace
+              target_label: kubernetes_pod_name
+
+
+eric-enm-es-benchmark:
+  esbench:
+    count: 100
+    docsize: 200KB
+    maxsize: 5GB
+    queryruntime: 6
+    metricruntime: 10
+
+  resources:
+    esbench:
+      limits:
+        cpu: "2"
+        memory: "1000Mi"
+      requests:
+        cpu: 2000m
+        memory: "1000Mi"
+
+  persistentVolumeClaim:
+    storageClass:
+      block: standard
+
+  images:
+    initbench:
+      name: eric-enm-es-init-bench
+      tag:
+    esbench:
+      name: eric-enm-es-benchmark
+      tag:
+
+  imageCredentials:
+    repoPath:
+    pullPolicy: Always
+    registry:
+      url:
+      pullSecret:
+
+  eric-data-search-engine:
+    enabled: true
+    global:
+      security:
+        tls:
+          enabled: false
+    logshipper:
+      storagePath: "/logs"
+    log:
+      logshipper:
+        level: "info"
+      outputs:
+        - "stream"
+        - "stdout"
+          #nameOverride: "elasticsearch-tooling"
+        #Override: "tooling"
+    nameOverride: "elasticsearch"
+    replicaCount:
+      ingest: 2
+      master: 3
+      data: 2
+    updateStrategy:
+      ingest:
+        rollingUpdate:
+          maxUnavailable: 1
+          maxSurge: 0
+    searchengine:
+      host: "elasticsearch"
+    annotations:
+      prometheus.io/scrape: "true"
+    affinity:
+      podAntiAffinity: "hard"
+    autoSetRequiredWorkerNodeSysctl: "false"
+    jvmHeap:
+      ingest: "5120m"
+      master: "2048m"
+      data: "7168m"
+    startupProbe:
+      data:
+        periodSeconds: 60
+        failureThreshold: 600
+    resources:
+      ingest:
+        limits:
+          cpu: "2000m"
+          memory: "6Gi"
+        requests:
+          cpu: "500m"
+          memory: "3Gi"
+      master:
+        limits:
+          cpu: "1000m"
+          memory: "3Gi"
+        requests:
+          cpu: "500m"
+          memory: "3Gi"
+      data:
+        limits:
+          cpu: "4000m"
+          memory: "12Gi"
+        requests:
+          cpu: "1000m"
+          memory: "10Gi"
+      logshipper:
+        requests:
+          memory: "100Mi"
+          cpu: "100m"
+        limits:
+          memory: "200Mi"
+          cpu: "200m"
+    persistence:
+      data:
+        persistentVolumeClaim:
+          size: "520Gi"
+      backup:
+        persistentVolumeClaim:
+          size: "520Gi"
+      master:
+        persistentVolumeClaim:
+          size: "512Mi"
+    brAgent:
+      enabled: false
+      customAgent: false
+
+eric-enm-cniv-modeling-benchmark:
+  images:
+    initBench:
+      tag:

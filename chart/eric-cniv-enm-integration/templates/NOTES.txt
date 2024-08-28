@@ -1,0 +1,11 @@
+CN Infrastructure Verification tool deployed.
+
+You can follow benchmark progress from the CLI using kubectl logs.
+
+The report can also be accessed via HTTP on port 8080 of the cn-infra-verification service.
+
+Example:
+
+  $ kubectl port-forward svc/{{ .Values.global.cnivAgent.name }} 8080:8080 -n {{ .Release.Namespace }}
+
+Then open http://localhost:8080/ in your browser.

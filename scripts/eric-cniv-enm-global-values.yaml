@@ -1,0 +1,48 @@
+tags:
+  initial-verification: true
+  network-verification: true
+  file-storage-verification: true
+  block-storage-verification: true
+  custom-bench: true
+
+global:
+  sccResources:
+  - enm-privileged
+  - enm-restricted
+  sequence:
+    - initial-verification:
+      - eric-cniv-k8s-apis
+      - eric-cniv-k8s-version
+      - eric-cniv-resources
+    - network-verification:
+      - eric-cniv-netperf
+    - file-storage-verification:
+      - eric-cniv-file-storage
+    - block-storage-verification:
+      - eric-cniv-block-storage
+    - custom-bench:
+      - eric-enm-es-benchmark
+      - eric-enm-pm-bench
+      - eric-enm-document-database-benchmark
+      - eric-neo4j-load-test-fwk
+      - eric-enm-cniv-modeling-benchmark
+  pullSecret:
+  cnivAgent:
+    enabled: true
+    name: eric-oss-cn-infra-verification-tool
+    port: 8080
+  registry:
+    url: 
+    pullSecret: 
+  persistentVolumeClaim:
+    storageClass:
+      block: 
+      file: 
+  nodes: 1
+  clusterZones:
+    zone1:
+    zone2:
+  csarVersion:
+  optionalApplications:
+    EBS L + N: disabled
+    EBS M: disabled

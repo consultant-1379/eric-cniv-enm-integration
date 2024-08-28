@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: neo4j-inspector
+spec:
+  containers:
+  - image: armdocker.rnd.ericsson.se/proj-ldc/common_base_os_release/sles:6.5.0-10
+    name: neo4j-inspector
+    command: ["tail"]
+    args: ["-f", "/dev/null"]
+    volumeMounts:
+    - mountPath: /pvc
+      name: pvc-mount
+  volumes:
+  - name: pvc-mount
+    persistentVolumeClaim:
+      claimName: load-profiles
+
+---
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: storage-inspector
+spec:
+  containers:
+  - image: armdocker.rnd.ericsson.se/proj-ldc/common_base_os_release/sles:6.5.0-10
+    name: storage-inspector
+    command: ["tail"]
+    args: ["-f", "/dev/null"]
+    volumeMounts:
+    - mountPath: /mnt/file
+      name: file-volume
+    - mountPath: /mnt/block
+      name: block-volume
+  volumes:
+  - name: file-volume
+    persistentVolumeClaim:
+      claimName: eric-cniv-file-storage
+  - name: block-volume
+    persistentVolumeClaim:
+      claimName: eric-cniv-block-storage
